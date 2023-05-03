@@ -124,17 +124,22 @@ func (f *Framework) SaveSession(s *session.Session) {
 
 func (f *Framework) AddMenu(k string, m string) {
 	mn := f.menuRegistry.Find(m)
-	f.router.AddRoute(k, mn)
-	utils.Logger.Info("registered route", zap.String("routeKey", m), zap.String("routeMenu", m))
+
+	if mn != nil {
+		f.router.AddRoute(k, mn)
+		utils.Logger.Info("registered route", zap.String("routeKey", m), zap.String("routeMenu", m))
+	}
 }
 
 func (f *Framework) setup() {
+	e := gateway.NewEconetGateway()
+	f.registry.Register(e)
+}
+
+func (f *Framework) configureMenus() {
 	for k, v := range f.config.Menu.Navigation {
 		f.AddMenu(k, v)
 	}
-
-	e := gateway.NewEconetGateway()
-	f.registry.Register(e)
 }
 
 func getRepository() session.Repository {

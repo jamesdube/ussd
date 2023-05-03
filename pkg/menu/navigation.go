@@ -3,9 +3,11 @@ package menu
 type NavigationType int64
 
 const (
-	Stop     NavigationType = 0
-	Continue NavigationType = 1
-	Replay   NavigationType = 2
+	Stop      NavigationType = 0
+	Continue  NavigationType = 1
+	Replay    NavigationType = 2
+	Paginated NavigationType = 3
+	LongCode  NavigationType = 4
 )
 
 type Navigation struct {

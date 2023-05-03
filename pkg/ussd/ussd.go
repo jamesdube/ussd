@@ -29,8 +29,13 @@ func (u *Ussd) AddMiddleware(m middleware.Middleware) {
 	u.framework.middlewareRegistry.Add(m)
 }
 
+func (u *Ussd) SetPort(port int) {
+	u.port = port
+}
+
 func (u *Ussd) Start() {
 
+	u.framework.configureMenus()
 	app := fiber.New()
 
 	app.Use(recover.New())

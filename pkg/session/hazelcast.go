@@ -3,9 +3,13 @@ package session
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/hazelcast/hazelcast-go-client"
+	"github.com/jamesdube/ussd/internal/config"
 	"github.com/jamesdube/ussd/internal/utils"
 	"go.uber.org/zap"
+	"strconv"
+	"time"
 )
 
 const mapKey = "ussd-sessions"
@@ -16,8 +20,14 @@ type HazelcastRepository struct {
 
 func NewHazelCast(name string) *HazelcastRepository {
 
-	cfg := hazelcast.NewConfig()
-	cfg.Cluster.Name = name
+	host := config.Get("HAZELCAST_HOST")
+	portS := config.Get("HAZELCAST_PORT")
+	port, _ := strconv.Atoi(portS)
+
+	cfg := hazelcast.Config{}
+	cc := &cfg.Cluster
+	cc.Network.SetAddresses(fmt.Sprintf("%s:%d", host, port))
+	cc.Name = name
 
 	client, err := hazelcast.StartNewClientWithConfig(context.TODO(), cfg)
 	if err != nil {
@@ -84,13 +94,7 @@ func (h *HazelcastRepository) Save(s *Session) error {
 		return e
 	}
 
-	//js, err := ToJson(s)
-	//if err != nil {
-	//	utils.Logger.Error(e.Error())
-	//	return err
-	//}
-
-	err := hMap.Set(ctx, s.Id, s)
+	err := hMap.SetWithTTL(ctx, s.Id, s, time.Duration(60)*time.Second)
 	if err != nil {
 		utils.Logger.Error(e.Error())
 		return err
@@ -106,13 +110,13 @@ func (h *HazelcastRepository) Delete(id string) {
 	hMap, e := h.client.GetMap(ctx, mapKey)
 
 	if e != nil {
-		zap.Error(e)
+		utils.Logger.Error(e.Error())
 		return
 	}
 
 	err := hMap.Delete(ctx, id)
 	if err != nil {
-		zap.Error(err)
+		utils.Logger.Error(err.Error())
 		return
 	}
 

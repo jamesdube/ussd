@@ -1,15 +1,28 @@
 package menu
 
+import "github.com/jamesdube/ussd/pkg/session"
+
 type Menu interface {
-	Header() string
-	Render(c *Context, msg string) string
+	OnRequest(c *Context, msg string) Response
+	Process(ctx *Context, msg string) NavigationType
+}
+
+type Response struct {
+	Prompt    string
+	Options   []string
+	Paginated bool
+	PerPage   int
 }
 
 type Context struct {
-	Context        map[string]string
-	Msisdn         string
-	NavigationType NavigationType
-	Active         bool
+	Context                  map[string]string
+	Msisdn                   string
+	NavigationType           NavigationType
+	Paginated                bool
+	Pages                    [][]string
+	CurrentPage              int
+	SelectedPaginationOption int
+	Active                   bool
 }
 
 func (d *Context) Add(k string, v string) {
@@ -22,6 +35,10 @@ func (d *Context) Get(k string) string {
 
 func (d *Context) GetData() map[string]string {
 	return d.Context
+}
+
+func (d *Context) IsReplay() bool {
+	return d.NavigationType == Replay
 }
 
 type Registry struct {
@@ -41,11 +58,15 @@ func NewRegistry() *Registry {
 	return &Registry{menus: map[string]Menu{}}
 }
 
-func NewContext(msisdn string, attr map[string]string) *Context {
+func NewContext(msisdn string, session *session.Session) *Context {
 	return &Context{
 		NavigationType: Continue,
-		Context:        attr,
+		Context:        session.Attributes,
 		Msisdn:         msisdn,
+		Active:         true,
+		Paginated:      session.Paginated,
+		Pages:          session.Pages,
+		CurrentPage:    session.CurrentPage,
 	}
 }
 
