@@ -13,16 +13,3 @@ type FiberRepository interface {
 	Save(ctx *fiber.Ctx, s *Session)
 	Delete(ctx *fiber.Ctx, id string)
 }
-
-/*func (s *Session) AddSelection(m string) {
-	s.selections = append(s.selections, m)
-}
-
-func (s *Session) GetSelections() []string {
-	return s.selections
-}
-
-func (s *Session) GetID() string {
-	return s.id
-}
-*/

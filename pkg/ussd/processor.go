@@ -155,6 +155,10 @@ func buildResponse(g gateway.Gateway, message string, options []string, session 
 		m = message + opt
 	}
 
+	if session.Paginated {
+		m = m + "\n\n 0 More..."
+	}
+
 	return g.ToResponse(gateway.Response{
 		Message:       m,
 		Session:       session.GetID(),
