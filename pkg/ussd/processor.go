@@ -156,7 +156,7 @@ func buildResponse(g gateway.Gateway, message string, options []string, session 
 	}
 
 	if session.Paginated {
-		m = m + "\n\n 0 More..."
+		m = m + "\n0. More"
 	}
 
 	return g.ToResponse(gateway.Response{
