@@ -155,7 +155,7 @@ func buildResponse(g gateway.Gateway, message string, options []string, session 
 		m = message + opt
 	}
 
-	if session.Paginated {
+	if session.PaginatedHasMore {
 		m = m + "\n0. More"
 	}
 
@@ -192,11 +192,19 @@ func handlePagination(framework *Framework, c *menu.Context, ctx *fiber.Ctx, mes
 
 	first := session.CurrentPage == 0
 	cont := first || message == "0"
-	last := (len(c.Pages)) == 1 || (len(c.Pages)) == (c.CurrentPage)
+	last := (len(c.Pages)) == (c.CurrentPage) || (len(c.Pages)) == 1
+
+	if len(c.Pages) == (c.CurrentPage + 1) {
+		fmt.Println("last page")
+		session.PaginatedHasMore = false
+	}
 
 	fmt.Println("pagination option processing menu")
 
 	if !first && !cont || last {
+
+		//c.Paginated = false
+		//session.Paginated = false
 
 		io, e := strconv.Atoi(message)
 		validOption := isValidOption(c, io)
@@ -229,6 +237,9 @@ func handlePagination(framework *Framework, c *menu.Context, ctx *fiber.Ctx, mes
 		res := mn.OnRequest(c, message)
 
 		postNavigation(framework, c, session)
+
+		c.Paginated = false
+		session.Paginated = false
 
 		r := buildResponse(gateway, res.Prompt, res.Options, session, msisdn, c.Active)
 		return sendResponse(r, ctx)
@@ -297,6 +308,7 @@ func createPagination(c *menu.Context, menuResponse menu.Response, session *sess
 	c.Pages = pages
 	c.CurrentPage = 0
 	session.Paginated = true
+	session.PaginatedHasMore = len(c.Pages) > 1
 	session.Pages = c.Pages
 	session.CurrentPage = c.CurrentPage
 

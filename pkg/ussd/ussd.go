@@ -40,7 +40,7 @@ func (u *Ussd) Start() {
 
 	app.Use(recover.New())
 
-	SetupLogging(app)
+	//SetupLogging(app)
 	SetupRoutes(u.framework, app)
 	SetupMetrics(app)
 

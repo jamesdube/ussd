@@ -6,13 +6,14 @@ import (
 )
 
 type Session struct {
-	Id          string            `json:"id"`
-	Attributes  map[string]string `json:"attributes"`
-	Selections  []string          `json:"selections"`
-	Active      bool              `json:"active"`
-	Paginated   bool              `json:"paginated"`
-	Pages       [][]string        `json:"pages"`
-	CurrentPage int               `json:"currentPage"`
+	Id               string            `json:"id"`
+	Attributes       map[string]string `json:"attributes"`
+	Selections       []string          `json:"selections"`
+	Active           bool              `json:"active"`
+	Paginated        bool              `json:"paginated"`
+	PaginatedHasMore bool              `json:"PaginatedHasMore"`
+	Pages            [][]string        `json:"pages"`
+	CurrentPage      int               `json:"currentPage"`
 }
 
 func NewSession(id string) *Session {
