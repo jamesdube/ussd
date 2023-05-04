@@ -202,7 +202,14 @@ func handlePagination(framework *Framework, c *menu.Context, ctx *fiber.Ctx, mes
 			return onErrorWith(u.MenuInvalidSelection, framework, ctx, gateway, session, msisdn)
 		}
 
-		c.SelectedPaginationOption = io
+		var count int
+
+		if (len(c.Pages)) > 1 {
+			pct := len(c.Pages[c.CurrentPage-1])
+			count = pct
+		}
+
+		c.SelectedPaginationOption = io + count
 		prev := framework.router.RouteTo(session.GetSelections())
 		prev.Process(c, message)
 
