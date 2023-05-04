@@ -204,7 +204,7 @@ func handlePagination(framework *Framework, c *menu.Context, ctx *fiber.Ctx, mes
 
 		var count int
 
-		if (len(c.Pages)) > 1 {
+		if (len(c.Pages)) > 1 && c.CurrentPage > 1 {
 			pct := len(c.Pages[c.CurrentPage-2])
 			count = pct
 		}
