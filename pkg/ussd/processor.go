@@ -188,11 +188,11 @@ func handlePagination(framework *Framework, c *menu.Context, ctx *fiber.Ctx, mes
 
 	first := session.CurrentPage == 0
 	cont := first || message == "0"
-	//last := (len(c.Pages) - 1) == (c.CurrentPage)
+	last := (len(c.Pages)) == 1 || (len(c.Pages)) == (c.CurrentPage)
 
 	fmt.Println("pagination option processing menu")
 
-	if !first {
+	if !first && !cont || last {
 
 		io, e := strconv.Atoi(message)
 		validOption := isValidOption(c, io)

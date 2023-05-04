@@ -18,7 +18,7 @@ func (h *Paginated) OnRequest(ctx *menu.Context, msg string) menu.Response {
 	return menu.Response{
 		Prompt:  "foo",
 		Options: []string{"one", "two", "three", "four"},
-		PerPage: 4,
+		PerPage: 2,
 	}
 }
 
