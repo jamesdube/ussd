@@ -22,6 +22,7 @@ type Context struct {
 	Pages                    [][]string
 	CurrentPage              int
 	SelectedPaginationOption int
+	SelectedPageOption       int
 	Active                   bool
 }
 

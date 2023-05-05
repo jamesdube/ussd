@@ -199,6 +199,10 @@ func handlePagination(framework *Framework, c *menu.Context, ctx *fiber.Ctx, mes
 		session.PaginatedHasMore = false
 	}
 
+	if last && message == "0" {
+		return onErrorWith(u.MenuNoMoreOptions, framework, ctx, gateway, session, msisdn)
+	}
+
 	fmt.Println("pagination option processing menu")
 
 	if !first && !cont || last {
@@ -222,6 +226,7 @@ func handlePagination(framework *Framework, c *menu.Context, ctx *fiber.Ctx, mes
 		}
 
 		c.SelectedPaginationOption = io + count
+		c.SelectedPageOption = io
 		prev := framework.router.RouteTo(session.GetSelections())
 		prev.Process(c, message)
 

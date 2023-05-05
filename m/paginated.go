@@ -17,14 +17,17 @@ func (h *Paginated) OnRequest(ctx *menu.Context, msg string) menu.Response {
 
 	return menu.Response{
 		Prompt:  "foo",
-		Options: []string{"one", "two", "three", "four"},
+		Options: []string{"one", "two", "three", "four", "five", "six", "seven", "eight"},
 		PerPage: 2,
 	}
 }
 
 func (h *Paginated) Process(ctx *menu.Context, msg string) menu.NavigationType {
 
-	val := ctx.Pages[ctx.CurrentPage-1][ctx.SelectedPaginationOption-1]
+	fmt.Println("selected-pagination-option:", ctx.SelectedPaginationOption)
+	fmt.Println("selected-page-option:", ctx.SelectedPageOption)
+
+	val := ctx.Pages[ctx.CurrentPage-1][ctx.SelectedPageOption-1]
 
 	fmt.Println("Paginated on Process:", msg, "selected", "value:", val)
 
