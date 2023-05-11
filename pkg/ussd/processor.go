@@ -155,7 +155,7 @@ func buildResponse(g gateway.Gateway, message string, options []string, session 
 		m = message + opt
 	}
 
-	if session.PaginatedHasMore {
+	if session.PaginatedHasMore && session.Paginated {
 		m = m + "\n0. More"
 	}
 
@@ -261,6 +261,8 @@ func handlePagination(framework *Framework, c *menu.Context, ctx *fiber.Ctx, mes
 	if cont {
 		session.CurrentPage++
 		framework.SaveSession(session)
+	} else {
+		fmt.Println("should set pagination to false here")
 	}
 
 	/*	if (len(c.Pages) - 1) == (c.CurrentPage) {
