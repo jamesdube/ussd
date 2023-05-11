@@ -205,6 +205,10 @@ func handlePagination(framework *Framework, c *menu.Context, ctx *fiber.Ctx, mes
 
 	fmt.Println("pagination option processing menu")
 
+	fmt.Println("current page original:", c.CurrentPage)
+	fmt.Println("current page calculated:", c.CurrentPage-1)
+	//fmt.Println("current pages:", c.Pages[c.CurrentPage])
+
 	if !first && !cont || last {
 
 		//c.Paginated = false
@@ -218,14 +222,17 @@ func handlePagination(framework *Framework, c *menu.Context, ctx *fiber.Ctx, mes
 			return onErrorWith(u.MenuInvalidSelection, framework, ctx, gateway, session, msisdn)
 		}
 
-		var count int
-
+		var optionsCount int
 		if (len(c.Pages)) > 1 && c.CurrentPage > 1 {
-			pct := len(c.Pages[c.CurrentPage-2])
-			count = pct
+			pagesViewed := c.CurrentPage - 1
+			for i := 0; i < pagesViewed; i++ {
+				optionsCount = optionsCount + len(c.Pages[i])
+			}
 		}
 
-		c.SelectedPaginationOption = io + count
+		fmt.Println("options count:", optionsCount)
+
+		c.SelectedPaginationOption = io + optionsCount
 		c.SelectedPageOption = io
 		prev := framework.router.RouteTo(session.GetSelections())
 		prev.Process(c, message)
