@@ -43,10 +43,7 @@ func process(framework *Framework, name string) func(ctx *fiber.Ctx) error {
 		c := menu.NewContext(gr.Msisdn, ss)
 
 		if c.Paginated {
-
-			fmt.Println("pagination wanted")
-			return handlePagination(framework, c, ctx, gr.Message, "from context session", gr.Msisdn, gw, ss)
-
+			return handlePagination(framework, c, ctx, gr.Message, "Please select an option:", gr.Msisdn, gw, ss)
 		}
 
 		prev := framework.router.RouteTo(ss.GetSelections())
@@ -195,7 +192,6 @@ func handlePagination(framework *Framework, c *menu.Context, ctx *fiber.Ctx, mes
 	last := (len(c.Pages)) == (c.CurrentPage) || (len(c.Pages)) == 1
 
 	if len(c.Pages) == (c.CurrentPage + 1) {
-		fmt.Println("last page")
 		session.PaginatedHasMore = false
 	}
 
@@ -203,16 +199,7 @@ func handlePagination(framework *Framework, c *menu.Context, ctx *fiber.Ctx, mes
 		return onErrorWith(u.MenuNoMoreOptions, framework, ctx, gateway, session, msisdn)
 	}
 
-	fmt.Println("pagination option processing menu")
-
-	fmt.Println("current page original:", c.CurrentPage)
-	fmt.Println("current page calculated:", c.CurrentPage-1)
-	//fmt.Println("current pages:", c.Pages[c.CurrentPage])
-
 	if !first && !cont || last {
-
-		//c.Paginated = false
-		//session.Paginated = false
 
 		io, e := strconv.Atoi(message)
 		validOption := isValidOption(c, io)
@@ -229,8 +216,6 @@ func handlePagination(framework *Framework, c *menu.Context, ctx *fiber.Ctx, mes
 				optionsCount = optionsCount + len(c.Pages[i])
 			}
 		}
-
-		fmt.Println("options count:", optionsCount)
 
 		c.SelectedPaginationOption = io + optionsCount
 		c.SelectedPageOption = io
@@ -261,27 +246,7 @@ func handlePagination(framework *Framework, c *menu.Context, ctx *fiber.Ctx, mes
 	if cont {
 		session.CurrentPage++
 		framework.SaveSession(session)
-	} else {
-		fmt.Println("should set pagination to false here")
 	}
-
-	/*	if (len(c.Pages) - 1) == (c.CurrentPage) {
-			fmt.Println("Last Page")
-			session.Paginated = false
-			//framework.RemoveLastSessionEntry(session.Id)
-
-			mn := framework.router.RouteTo(session.GetSelections())
-
-			fmt.Println("pagination option processing menu")
-			mn.Process(c, message)
-
-			postNavigation(framework, c, session)
-
-		} else {
-			fmt.Println("Not Last Page")
-			session.CurrentPage++
-			framework.SaveSession(session)
-		}*/
 
 	r := buildResponse(gateway, prompt, c.Pages[c.CurrentPage], session, msisdn, c.Active)
 
