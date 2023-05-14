@@ -1,7 +1,10 @@
 package session
 
+import "sync"
+
 type InMemory struct {
 	sessions map[string]*Session
+	mu       sync.RWMutex
 }
 
 func NewInMemory() *InMemory {
@@ -27,10 +30,14 @@ func (im *InMemory) GetSession(id string) (*Session, error) {
 }
 
 func (im *InMemory) Save(s *Session) error {
+	im.mu.Lock()
+	defer im.mu.Unlock()
 	im.sessions[s.GetID()] = s
 	return nil
 }
 
 func (im *InMemory) Delete(id string) {
+	im.mu.Lock()
+	defer im.mu.Unlock()
 	delete(im.sessions, id)
 }
