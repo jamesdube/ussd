@@ -1,7 +1,6 @@
 package ussd
 
 import (
-	"github.com/gofiber/contrib/fiberzap"
 	"github.com/gofiber/fiber/v2"
 	"github.com/jamesdube/ussd/internal/utils"
 )
@@ -9,9 +8,9 @@ import (
 func SetupLogging(app *fiber.App) {
 
 	utils.InitializeLogger()
-	logger := utils.Logger
+	//logger := utils.Logger
 
-	app.Use(fiberzap.New(fiberzap.Config{
-		Logger: logger,
-	}))
+	//app.Use(fiberzap.New(fiberzap.Config{
+	//	Logger: logger,
+	//}))
 }

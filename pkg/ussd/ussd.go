@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/jamesdube/ussd/internal/utils"
 	"github.com/jamesdube/ussd/pkg/menu"
 	"github.com/jamesdube/ussd/pkg/middleware"
-	"log"
 )
 
 type Ussd struct {
@@ -44,6 +44,6 @@ func (u *Ussd) Start() {
 	SetupRoutes(u.framework, app)
 	SetupMetrics(app)
 
-	log.Fatal(app.Listen(fmt.Sprintf(":%d", u.port)))
+	utils.Logger.Error(app.Listen(fmt.Sprintf(":%d", u.port)).Error())
 
 }

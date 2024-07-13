@@ -69,7 +69,7 @@ func process(framework *Framework, name string) func(ctx *fiber.Ctx) error {
 		mn := framework.router.RouteTo(ss.GetSelections())
 
 		if mn == nil {
-			u.Logger.Error("menu not found for route", zap.Any("route", ss.GetSelections()))
+			u.Logger.Error("menu not found for route", "route", ss.GetSelections())
 			return onErrorWith(u.MenuInvalidSelection, framework, ctx, gw, ss, gr.Msisdn)
 		}
 

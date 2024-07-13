@@ -3,7 +3,6 @@ package router
 import (
 	"github.com/jamesdube/ussd/internal/utils"
 	"github.com/jamesdube/ussd/pkg/menu"
-	"go.uber.org/zap"
 )
 
 type Router struct {
@@ -29,7 +28,7 @@ func (r *Router) RouteTo(s []string) menu.Menu {
 
 		found := check(route, s)
 		if found {
-			utils.Logger.Info("routing to ", zap.String("route", k))
+			utils.Logger.Debug("routing to ", "route", k)
 			return m
 		}
 	}

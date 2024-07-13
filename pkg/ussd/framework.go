@@ -10,7 +10,6 @@ import (
 	"github.com/jamesdube/ussd/pkg/router"
 	"github.com/jamesdube/ussd/pkg/session"
 	"github.com/spf13/viper"
-	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 )
@@ -127,7 +126,7 @@ func (f *Framework) AddMenu(k string, m string) {
 
 	if mn != nil {
 		f.router.AddRoute(k, mn)
-		utils.Logger.Info("registered route", zap.String("routeKey", m), zap.String("routeMenu", m))
+		utils.Logger.Info("registered route", "routeKey", m, "routeMenu", m)
 	}
 }
 
@@ -160,7 +159,7 @@ func getRepository() session.Repository {
 }
 
 func logProvider(name string) {
-	utils.Logger.Info("using session repository", zap.String("repository", name))
+	utils.Logger.Info("using session repository", "repository", name)
 }
 
 func loadConfig() {
