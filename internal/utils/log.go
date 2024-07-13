@@ -8,6 +8,14 @@ import (
 
 var Logger *slog.Logger
 
+func SetLogger(logger *slog.Logger) {
+
+	if logger == nil {
+		return
+	}
+	Logger = logger
+}
+
 func InitializeLogger() {
 
 	Logger = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
