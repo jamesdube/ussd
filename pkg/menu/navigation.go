@@ -3,8 +3,8 @@ package menu
 type NavigationType int64
 
 const (
-	Stop      NavigationType = 0
-	Continue  NavigationType = 1
+	Continue  NavigationType = 0
+	Stop      NavigationType = 1
 	Replay    NavigationType = 2
 	Paginated NavigationType = 3
 	LongCode  NavigationType = 4
