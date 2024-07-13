@@ -126,7 +126,7 @@ func (f *Framework) AddMenu(k string, m string) {
 
 	if mn != nil {
 		f.router.AddRoute(k, mn)
-		utils.Logger.Info("registered route", "routeKey", m, "routeMenu", m)
+		utils.Logger.Debug("registered route", "routeKey", m, "routeMenu", m)
 	}
 }
 
@@ -159,7 +159,7 @@ func getRepository() session.Repository {
 }
 
 func logProvider(name string) {
-	utils.Logger.Info("using session repository", "repository", name)
+	utils.Logger.Debug("using session repository", "repository", name)
 }
 
 func loadConfig() {
