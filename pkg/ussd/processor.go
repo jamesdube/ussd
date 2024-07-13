@@ -75,7 +75,7 @@ func process(framework *Framework, name string) func(ctx *fiber.Ctx) error {
 
 		rMsg := mn.OnRequest(c, msg)
 
-		if c.Paginated {
+		if rMsg.Paginated {
 
 			createPagination(c, rMsg, ss)
 
