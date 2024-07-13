@@ -11,25 +11,29 @@ import (
 )
 
 type Ussd struct {
-	framework  *Framework
-	port       int
-	hideBanner bool
-	logger     *slog.Logger
+	framework *Framework
+	config    *Config
 }
 
-func New() *Ussd {
-	return &Ussd{
-		framework: Init(),
-		port:      7600,
+type Config struct {
+	AppName    string
+	Port       int
+	HideBanner bool
+	Logger     *slog.Logger
+}
+
+func New(config ...Config) *Ussd {
+
+	cfg := Config{}
+
+	if len(config) > 0 {
+		cfg = config[0]
 	}
-}
 
-func (u *Ussd) HideBanner(bool bool) {
-	u.hideBanner = bool
-}
-
-func (u *Ussd) SetLogger(logger *slog.Logger) {
-	u.logger = logger
+	return &Ussd{
+		framework: Init(cfg.Logger),
+		config:    &cfg,
+	}
 }
 
 func (u *Ussd) AddMenu(name string, m menu.Menu) {
@@ -40,22 +44,21 @@ func (u *Ussd) AddMiddleware(m middleware.Middleware) {
 	u.framework.middlewareRegistry.Add(m)
 }
 
-func (u *Ussd) SetPort(port int) {
-	u.port = port
-}
-
 func (u *Ussd) Start() {
 
+	app := fiber.New(fiber.Config{
+		AppName:               u.config.AppName,
+		DisableStartupMessage: u.config.HideBanner,
+	})
+
 	u.framework.configureMenus()
-	app := fiber.New()
 
 	app.Use(recover.New())
 
-	//SetupLogging(app)
 	SetupRoutes(u.framework, app)
 	SetupMetrics(app)
-	utils.SetLogger(u.logger)
+	//utils.SetLogger(u.logger)
 
-	utils.Logger.Error(app.Listen(fmt.Sprintf(":%d", u.port)).Error())
+	utils.Logger.Error(app.Listen(fmt.Sprintf(":%d", u.config.Port)).Error())
 
 }

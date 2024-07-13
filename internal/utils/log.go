@@ -11,7 +11,7 @@ var Logger *slog.Logger
 func SetLogger(logger *slog.Logger) {
 
 	if logger == nil {
-		return
+		Logger = slog.Default()
 	}
 	Logger = logger
 }

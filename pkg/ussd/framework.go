@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
+	"log/slog"
 )
 
 type Framework struct {
@@ -38,10 +39,9 @@ type config struct {
 	}
 }
 
-func Init() *Framework {
+func Init(logger *slog.Logger) *Framework {
 
-	utils.InitializeLogger()
-
+	utils.SetLogger(logger)
 	configFile, err := ioutil.ReadFile("config.yaml")
 
 	var c config
