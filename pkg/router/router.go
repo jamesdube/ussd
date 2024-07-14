@@ -28,7 +28,7 @@ func (r *Router) RouteTo(s []string) menu.Menu {
 
 		found := check(route, s)
 		if found {
-			utils.Logger.Debug("routing to ", "route", k)
+			utils.Logger.Debug("routing to ", "route", k, "selection", s)
 			return m
 		}
 	}

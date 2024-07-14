@@ -126,7 +126,7 @@ func (f *Framework) AddMenu(k string, m string) {
 
 	if mn != nil {
 		f.router.AddRoute(k, mn)
-		utils.Logger.Debug("registered route", "routeKey", m, "routeMenu", m)
+		utils.Logger.Debug("registered route", "routeKey", k, "routeMenu", m)
 	}
 }
 
