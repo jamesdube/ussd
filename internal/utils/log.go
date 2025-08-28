@@ -1,10 +1,32 @@
 package utils
 
-import "go.uber.org/zap"
+import (
+	"log/slog"
+	"os"
+	"path"
+)
 
-var Logger *zap.Logger
+var Logger *slog.Logger
+
+func SetLogger(logger *slog.Logger) {
+
+	if logger == nil {
+		Logger = slog.Default()
+	}
+	Logger = logger
+}
 
 func InitializeLogger() {
-	logger, _ := zap.NewProduction()
-	Logger = logger
+
+	Logger = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		AddSource: true,
+		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+			if a.Key == slog.SourceKey {
+				s := a.Value.Any().(*slog.Source)
+				s.File = path.Base(s.File)
+			}
+			return a
+		},
+	}))
+
 }

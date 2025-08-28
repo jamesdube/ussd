@@ -57,7 +57,7 @@ func process(framework *Framework, name string) func(ctx *fiber.Ctx) error {
 			fmt.Println("replay wanted")
 			pr := prev.OnRequest(c, msg)
 
-			postNavigation(framework, c, ss)
+			postNavigation(framework, c, ss, pr)
 
 			r := buildResponse(gw, pr.Prompt, pr.Options, ss, gr.Msisdn, c.Active)
 			return sendResponse(r, ctx)
@@ -69,23 +69,23 @@ func process(framework *Framework, name string) func(ctx *fiber.Ctx) error {
 		mn := framework.router.RouteTo(ss.GetSelections())
 
 		if mn == nil {
-			u.Logger.Error("menu not found for route", zap.Any("route", ss.GetSelections()))
+			u.Logger.Error("menu not found for route", "route", ss.GetSelections())
 			return onErrorWith(u.MenuInvalidSelection, framework, ctx, gw, ss, gr.Msisdn)
 		}
 
 		rMsg := mn.OnRequest(c, msg)
 
-		if c.Paginated {
+		if rMsg.Paginated {
 
 			createPagination(c, rMsg, ss)
 
-			postNavigation(framework, c, ss)
+			postNavigation(framework, c, ss, rMsg)
 
 			return handlePagination(framework, c, ctx, gr.Message, rMsg.Prompt, gr.Msisdn, gw, ss)
 
 		}
 
-		postNavigation(framework, c, ss)
+		postNavigation(framework, c, ss, rMsg)
 
 		r := buildResponse(gw, rMsg.Prompt, rMsg.Options, ss, gr.Msisdn, c.Active)
 		return sendResponse(r, ctx)
@@ -110,9 +110,9 @@ func onErrorWith(msg string, framework *Framework, ctx *fiber.Ctx, gateway gatew
 
 }
 
-func postNavigation(f *Framework, c *menu.Context, ss *session.Session) {
+func postNavigation(f *Framework, c *menu.Context, ss *session.Session, response menu.Response) {
 
-	switch c.NavigationType {
+	switch response.NavigationType {
 
 	case menu.Stop:
 		{
@@ -204,7 +204,7 @@ func handlePagination(framework *Framework, c *menu.Context, ctx *fiber.Ctx, mes
 		io, e := strconv.Atoi(message)
 		validOption := isValidOption(c, io)
 		if e != nil || !validOption {
-			postNavigation(framework, c, session)
+			postNavigation(framework, c, session, menu.Response{NavigationType: menu.Continue})
 			u.Logger.Error("invalid pagination option", zap.Any("route", session.GetSelections()))
 			return onErrorWith(u.MenuInvalidSelection, framework, ctx, gateway, session, msisdn)
 		}
@@ -233,7 +233,7 @@ func handlePagination(framework *Framework, c *menu.Context, ctx *fiber.Ctx, mes
 
 		res := mn.OnRequest(c, message)
 
-		postNavigation(framework, c, session)
+		postNavigation(framework, c, session, res)
 
 		c.Paginated = false
 		session.Paginated = false

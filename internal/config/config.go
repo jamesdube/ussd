@@ -1,7 +1,7 @@
 package config
 
 import (
-	"fmt"
+	"github.com/jamesdube/ussd/internal/utils"
 	"github.com/joho/godotenv"
 	"os"
 )
@@ -11,7 +11,7 @@ func Get(key string) string {
 	// load .env file
 	err := godotenv.Load(".env")
 	if err != nil {
-		fmt.Print("Error loading .env file")
+		utils.Logger.Error("Error loading .env file")
 	}
 	return os.Getenv(key)
 }

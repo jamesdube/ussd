@@ -1,17 +1,22 @@
 package ussd
 
 import (
-	"github.com/gofiber/contrib/fiberzap"
 	"github.com/gofiber/fiber/v2"
 	"github.com/jamesdube/ussd/internal/utils"
+	"log/slog"
 )
 
-func SetupLogging(app *fiber.App) {
+func SetupLogging(app *fiber.App, logger *slog.Logger) {
 
-	utils.InitializeLogger()
-	logger := utils.Logger
+	if logger != nil {
+		utils.Logger = logger
+		return
+	}
+	utils.Logger = slog.Default()
+	//utils.InitializeLogger()
+	//logger := utils.Logger
 
-	app.Use(fiberzap.New(fiberzap.Config{
-		Logger: logger,
-	}))
+	//app.Use(fiberzap.New(fiberzap.Config{
+	//	Logger: logger,
+	//}))
 }

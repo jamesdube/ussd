@@ -8,10 +8,11 @@ type Menu interface {
 }
 
 type Response struct {
-	Prompt    string
-	Options   []string
-	Paginated bool
-	PerPage   int
+	Prompt         string
+	Options        []string
+	Paginated      bool
+	PerPage        int
+	NavigationType NavigationType
 }
 
 type Context struct {
