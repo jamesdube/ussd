@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
-	
+	"strings"
 )
 
 func StringToSlice(s string) []string {
