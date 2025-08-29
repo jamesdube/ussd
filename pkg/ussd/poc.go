@@ -5,7 +5,6 @@ import (
 	u "github.com/jamesdube/ussd/internal/utils"
 	"github.com/jamesdube/ussd/pkg/menu"
 	"github.com/jamesdube/ussd/pkg/session"
-	"go.uber.org/zap"
 )
 
 type Normal struct {
@@ -22,7 +21,7 @@ func (n *Normal) Render(message string, ctx *menu.Context, sess *session.Session
 
 	if mn == nil {
 
-		u.Logger.Error("menu not found for route", zap.Any("route", sess.GetSelections()))
+		u.Logger.Error("menu not found for route", "route", sess.GetSelections())
 		return menu.Response{
 			Prompt: "error",
 		}
