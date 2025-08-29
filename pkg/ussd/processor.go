@@ -8,89 +8,137 @@ import (
 	"github.com/jamesdube/ussd/pkg/gateway"
 	"github.com/jamesdube/ussd/pkg/menu"
 	"github.com/jamesdube/ussd/pkg/session"
-	"go.uber.org/zap"
 	"strconv"
 	"strings"
 )
 
 func process(framework *Framework, name string) func(ctx *fiber.Ctx) error {
-
 	gw := framework.GetGateway(name)
 
 	return func(ctx *fiber.Ctx) error {
-
-		gr, err := gw.ToRequest(ctx)
-
+		// Parse incoming request
+		gr, err := parseRequest(ctx, gw)
 		if err != nil {
-			u.Logger.Error("Can't unmarshal the byte array")
-			return ctx.SendString("failed to unmarshal")
+			return err
 		}
 
-		msg := gr.Message
-
-		ss, e := framework.GetOrCreateSession(gr.SessionId)
-
-		if e != nil {
-			u.Logger.Error("failed to initiate session")
-			return onError(framework, ctx, gw, ss, gr.Msisdn)
-		}
-
-		err = runMiddleware(framework, ss, gr)
+		// Setup session and context
+		ss, c, err := setupSessionAndContext(framework, gr)
 		if err != nil {
 			return onErrorWith(err.Error(), framework, ctx, gw, ss, gr.Msisdn)
 		}
 
-		c := menu.NewContext(gr.Msisdn, ss)
-
+		// Handle pagination if active
 		if c.Paginated {
 			return handlePagination(framework, c, ctx, gr.Message, "Please select an option:", gr.Msisdn, gw, ss)
 		}
 
-		prev := framework.router.RouteTo(ss.GetSelections())
+		// Process menu navigation
+		return processMenuNavigation(framework, c, ctx, gr, gw, ss)
+	}
+}
 
-		if prev != nil {
-			prev.Process(c, msg)
-		}
+// parseRequest extracts and validates the gateway request
+func parseRequest(ctx *fiber.Ctx, gw gateway.Gateway) (gateway.Request, error) {
+	gr, err := gw.ToRequest(ctx)
+	if err != nil {
+		u.Logger.Error("Can't unmarshal the byte array")
+		return gateway.Request{}, ctx.SendString("failed to unmarshal")
+	}
+	return gr, nil
+}
 
-		if c.NavigationType == menu.Replay {
-
-			fmt.Println("replay wanted")
-			pr := prev.OnRequest(c, msg)
-
-			postNavigation(framework, c, ss, pr)
-
-			r := buildResponse(gw, pr.Prompt, pr.Options, ss, gr.Msisdn, c.Active)
-			return sendResponse(r, ctx)
-
-		}
-
-		ss.AddSelection(msg)
-		framework.SaveSession(ss)
-		mn := framework.router.RouteTo(ss.GetSelections())
-
-		if mn == nil {
-			u.Logger.Error("menu not found for route", "route", ss.GetSelections())
-			return onErrorWith(u.MenuInvalidSelection, framework, ctx, gw, ss, gr.Msisdn)
-		}
-
-		rMsg := mn.OnRequest(c, msg)
-
-		if rMsg.Paginated {
-
-			createPagination(c, rMsg, ss)
-
-			postNavigation(framework, c, ss, rMsg)
-
-			return handlePagination(framework, c, ctx, gr.Message, rMsg.Prompt, gr.Msisdn, gw, ss)
-
-		}
-
-		postNavigation(framework, c, ss, rMsg)
-
-		r := buildResponse(gw, rMsg.Prompt, rMsg.Options, ss, gr.Msisdn, c.Active)
-		return sendResponse(r, ctx)
+// setupSessionAndContext initializes session and menu context
+func setupSessionAndContext(framework *Framework, gr gateway.Request) (*session.Session, *menu.Context, error) {
+	ss, err := framework.GetOrCreateSession(gr.SessionId)
+	if err != nil {
+		u.Logger.Error("failed to initiate session")
+		return nil, nil, err
 	}
 
+	err = runMiddleware(framework, ss, gr)
+	if err != nil {
+		return ss, nil, err
+	}
+
+	c := menu.NewContext(gr.Msisdn, ss)
+	return ss, c, nil
+}
+
+// processMenuNavigation handles the core menu navigation logic
+func processMenuNavigation(framework *Framework, c *menu.Context, ctx *fiber.Ctx, gr gateway.Request, gw gateway.Gateway, ss *session.Session) error {
+	msg := gr.Message
+
+	// Process current menu if exists
+	prev := framework.router.RouteTo(ss.GetSelections())
+	if prev != nil {
+		prev.Process(c, msg)
+	}
+
+	// Handle navigation types returned by Process
+	switch c.NavigationType {
+	case menu.Stop:
+		return handleStopNavigation(framework, c, ctx, prev, msg, gw, ss, gr.Msisdn)
+	case menu.Replay:
+		return handleReplayNavigation(framework, c, ctx, prev, msg, gw, ss, gr.Msisdn)
+	default:
+		return handleStandardNavigation(framework, c, ctx, msg, gw, ss, gr)
+	}
+}
+
+// handleStopNavigation processes session termination navigation
+func handleStopNavigation(framework *Framework, c *menu.Context, ctx *fiber.Ctx, prev menu.Menu, msg string, gw gateway.Gateway, ss *session.Session, msisdn string) error {
+	// Get final response from menu
+	pr := prev.OnRequest(c, msg)
+
+	// Handle session cleanup
+	postNavigation(framework, c, ss, pr)
+
+	// Send termination response
+	r := buildResponse(gw, pr.Prompt, pr.Options, ss, msisdn, c.Active)
+	return sendResponse(r, ctx)
+}
+
+// handleReplayNavigation processes replay/back navigation
+func handleReplayNavigation(framework *Framework, c *menu.Context, ctx *fiber.Ctx, prev menu.Menu, msg string, gw gateway.Gateway, ss *session.Session, msisdn string) error {
+	fmt.Println("replay wanted")
+	pr := prev.OnRequest(c, msg)
+
+	postNavigation(framework, c, ss, pr)
+
+	r := buildResponse(gw, pr.Prompt, pr.Options, ss, msisdn, c.Active)
+	return sendResponse(r, ctx)
+}
+
+// handleStandardNavigation processes forward navigation
+func handleStandardNavigation(framework *Framework, c *menu.Context, ctx *fiber.Ctx, msg string, gw gateway.Gateway, ss *session.Session, gr gateway.Request) error {
+	ss.AddSelection(msg)
+	framework.SaveSession(ss)
+
+	mn := framework.router.RouteTo(ss.GetSelections())
+	if mn == nil {
+		u.Logger.Error("menu not found for route", "route", ss.GetSelections())
+		return onErrorWith(u.MenuInvalidSelection, framework, ctx, gw, ss, gr.Msisdn)
+	}
+
+	rMsg := mn.OnRequest(c, msg)
+
+	// Handle paginated response
+	if rMsg.Paginated {
+		return handlePaginatedResponse(framework, c, ctx, rMsg, gr, gw, ss)
+	}
+
+	// Handle standard response
+	postNavigation(framework, c, ss, rMsg)
+	r := buildResponse(gw, rMsg.Prompt, rMsg.Options, ss, gr.Msisdn, c.Active)
+	return sendResponse(r, ctx)
+}
+
+// handlePaginatedResponse sets up pagination and handles the response
+func handlePaginatedResponse(framework *Framework, c *menu.Context, ctx *fiber.Ctx, rMsg menu.Response, gr gateway.Request, gw gateway.Gateway, ss *session.Session) error {
+	createPagination(c, rMsg, ss)
+	postNavigation(framework, c, ss, rMsg)
+	return handlePagination(framework, c, ctx, gr.Message, rMsg.Prompt, gr.Msisdn, gw, ss)
 }
 
 func onError(framework *Framework, ctx *fiber.Ctx, gateway gateway.Gateway, ss *session.Session, msisdn string) error {
@@ -205,7 +253,7 @@ func handlePagination(framework *Framework, c *menu.Context, ctx *fiber.Ctx, mes
 		validOption := isValidOption(c, io)
 		if e != nil || !validOption {
 			postNavigation(framework, c, session, menu.Response{NavigationType: menu.Continue})
-			u.Logger.Error("invalid pagination option", zap.Any("route", session.GetSelections()))
+			u.Logger.Error("invalid pagination option", "route", session.GetSelections())
 			return onErrorWith(u.MenuInvalidSelection, framework, ctx, gateway, session, msisdn)
 		}
 
@@ -227,7 +275,7 @@ func handlePagination(framework *Framework, c *menu.Context, ctx *fiber.Ctx, mes
 
 		if mn == nil {
 
-			u.Logger.Error("menu not found for route", zap.Any("route", session.GetSelections()))
+			u.Logger.Error("menu not found for route", "route", session.GetSelections())
 			return onErrorWith(u.MenuInvalidSelection, framework, ctx, gateway, session, msisdn)
 		}
 
