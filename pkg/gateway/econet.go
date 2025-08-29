@@ -13,7 +13,6 @@ type EconetRequest struct {
 	Message   string `json:"message" xml:"message" form:"name"`
 	SessionId string `json:"transactionID" xml:"transactionID" form:"transactionID"`
 	Stage     string `json:"stage" xml:"stage" form:"stage"`
-	DestinationNumber string `json:"destinationNumber" xml:"destinationNumber" form:"destinationNumber"`
 }
 
 type messageResponse struct {
@@ -44,11 +43,11 @@ func (e *EconetGateway) ToRequest(c *fiber.Ctx) (Request, error) {
 	}
 
 	return Request{
-		Message:   er.Message,
-		Msisdn:    er.Msisdn,
-		SessionId: er.SessionId,
-		Stage	:  er.Stage,
-		DestinationNumber: er.DestinationNumber,
+		Message:           er.Message,
+		Msisdn:            er.Msisdn,
+		SessionId:         er.SessionId,
+		Stage:             er.Stage,
+		DestinationNumber: er.ShortCode,
 	}, nil
 }
 

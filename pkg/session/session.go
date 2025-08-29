@@ -16,7 +16,7 @@ type Session struct {
 }
 
 func NewSession(id string) *Session {
-	utils.Logger.Info("creating new session", "sessionId", id)
+	utils.Logger.Debug("creating new session", "sessionId", id)
 	return &Session{
 		Id:         id,
 		Attributes: map[string]string{},
