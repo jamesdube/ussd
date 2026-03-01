@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go fmt:*)",
+      "Bash(go build:*)",
+      "Bash(go vet:*)",
+      "Bash(go test:*)",
+      "mcp__acp__Write",
+      "mcp__acp__Bash",
+      "mcp__acp__Edit"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

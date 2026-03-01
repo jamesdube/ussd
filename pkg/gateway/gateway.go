@@ -14,10 +14,10 @@ type Gateway interface {
 }
 
 type Request struct {
-	SessionId string
-	Message   string
-	Msisdn    string
-	Stage	  string
+	SessionId         string
+	Message           string
+	Msisdn            string
+	Stage             string
 	DestinationNumber string // might change name later
 }
 

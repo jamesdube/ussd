@@ -1,0 +1,13 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ussd:
+    uses: scape-labs/ci-actions/.github/workflows/ci-workflow-library-go.yaml@main
