@@ -5,7 +5,6 @@ go 1.18
 require (
 	github.com/ansrivas/fiberprometheus/v2 v2.6.0
 	github.com/go-redis/redis v6.15.9+incompatible
-	github.com/gofiber/contrib/fiberzap v1.0.2
 	github.com/gofiber/fiber/v2 v2.44.0
 	github.com/hazelcast/hazelcast-go-client v1.4.0
 	github.com/joho/godotenv v1.5.1
@@ -17,6 +16,7 @@ require (
 require (
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
+	github.com/benbjohnson/clock v1.3.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
@@ -56,6 +56,7 @@ require (
 	github.com/valyala/fasthttp v1.45.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
+	go.uber.org/goleak v1.1.12 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/sys v0.7.0 // indirect
 	golang.org/x/text v0.8.0 // indirect

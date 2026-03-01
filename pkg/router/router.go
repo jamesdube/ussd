@@ -30,9 +30,6 @@ type Router struct {
 	exactRoutes    []CompiledRoute // Routes with no wildcards (fastest to match)
 	wildcardRoutes []CompiledRoute // Routes with wildcards (slower but flexible)
 	longCodeRoutes []CompiledRoute // Routes for USSD long codes (e.g., *123*1*1*100#)
-
-	// Legacy field - kept for backward compatibility but not used
-	menus []menu.Menu
 }
 
 // NewRouter creates a new router with compiled route optimization
@@ -41,7 +38,6 @@ func NewRouter() *Router {
 		exactRoutes:    make([]CompiledRoute, 0),
 		wildcardRoutes: make([]CompiledRoute, 0),
 		longCodeRoutes: make([]CompiledRoute, 0),
-		menus:          []menu.Menu{},
 	}
 }
 
@@ -188,22 +184,4 @@ func checkCompiled(routePattern []string, selections []string) bool {
 	}
 
 	return true
-}
-
-// Legacy functions maintained for backward compatibility
-
-func check(k []string, v []string) bool {
-	return checkCompiled(k, v)
-}
-
-func comparator(v1 string, v2 string) bool {
-	if v1 == v2 {
-		return true
-	}
-
-	if v1 == "*" {
-		return true
-	}
-
-	return false
 }
